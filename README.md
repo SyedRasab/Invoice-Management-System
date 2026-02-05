@@ -162,11 +162,10 @@ This project is licensed under the **MIT License**. You are free to use, modify,
 
 ## 👤 Author & Contact
 
-**Developed by [Your Name]**
+**Developed by Syed Rasab Ul Haque**
 
 *   📧 **Email**: contact@yourdomain.com
-*   💼 **LinkedIn**: [linkedin.com/in/yourprofile](https://linkedin.com/in/yourprofile)
-*   🐙 **GitHub**: [@yourusername](https://github.com/yourusername)
+*   💼 **LinkedIn**: [www.linkedin.com/in/rasab3922](https://www.linkedin.com/in/rasab3922)
 
 ---
 
