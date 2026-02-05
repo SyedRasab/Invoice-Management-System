@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Silver Trading System</title>
+    <link rel="stylesheet" href="css/theme.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: var(--bg-body-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        /* Decorative ambient glow behind card */
+        .ambient-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(30, 41, 59, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .login-card {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 420px;
+            padding: 48px;
+            border-radius: 24px;
+            z-index: 1;
+            position: relative;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .login-logo {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+            border-radius: 16px;
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 32px;
+            font-weight: 700;
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+        }
+
+        .login-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .login-subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .security-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 32px;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="ambient-glow"></div>
+
+    <div class="login-card">
+        <div class="login-header">
+            <div class="login-logo">S</div>
+            <h1 class="login-title">Silver Trading</h1>
+            <p class="login-subtitle">Enterprise Gateway</p>
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input type="text" id="username" class="form-control" placeholder="Enter username" required autofocus
+                    style="height: 48px;">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" id="password" class="form-control" placeholder="Enter password" required
+                    style="height: 48px;">
+            </div>
+
+            <button type="submit" class="btn btn-primary"
+                style="width: 100%; justify-content: center; padding: 14px; font-size: 1rem; margin-top: 12px;">
+                Authenticate System
+            </button>
+        </form>
+
+        <div id="errorMessage" class="text-danger text-center mt-4"
+            style="display: none; font-size: 0.9rem; margin-top: 24px; background: rgba(248, 113, 113, 0.1); padding: 12px; border-radius: 8px;">
+        </div>
+
+        <div class="security-badge">
+            <span style="color: var(--success-color);">🔒</span> End-to-End Encrypted Session
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const errorDiv = document.getElementById('errorMessage');
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            btn.disabled = true;
+            btn.innerHTML = '<span style="display:inline-block; animation: spin 1s infinite linear; margin-right:8px;">↻</span> Verifying Credentials...';
+            errorDiv.style.display = 'none';
+
+            try {
+                const result = await api.login(username, password);
+                if (result.success) {
+                    btn.innerHTML = '✔ Access Granted';
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-success');
+                    setTimeout(() => window.location.href = 'index.html', 500);
+                }
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = 'Authenticate System';
+            }
+        });
+
+        // Add spin animation style
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        `;
+        document.head.appendChild(style);
+
+        // Check if already logged in
+        window.addEventListener('load', async () => {
+            try {
+                const auth = await api.getCurrentUser();
+                if (auth.authenticated) {
+                    window.location.href = 'index.html';
+                }
+            } catch (e) {
+                // Ignore
+            }
+        });
+    </script>
+</body>
+
+</html>

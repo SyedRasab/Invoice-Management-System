@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Silver Trading System</title>
+    <link rel="stylesheet" href="css/theme.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .ambient-glow {
+            position: fixed;
+            top: -20%;
+            right: -10%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.08) 0%, rgba(15, 23, 42, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ambient-glow"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-text">
+                <div class="logo-icon"></div>
+                <span>Silver Trading</span>
+            </div>
+        </div>
+
+        <ul class="nav-links">
+            <li class="nav-item">
+                <a href="index.html" class="active">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="create_invoice.html">
+                    <span class="nav-icon">➕</span>
+                    <span>Create Invoice</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="view_customers.html">
+                    <span class="nav-icon">👥</span>
+                    <span>Customers</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="view_invoices.html">
+                    <span class="nav-icon">📄</span>
+                    <span>Invoices</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" onclick="handleLogout()">
+                    <span class="nav-icon">🚪</span>
+                    <span>Logout</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div style="font-size: 0.75rem; color: var(--text-dim);">Enterprise Edition v2.1</div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <header class="top-header">
+            <h1 class="page-title">Executive Overview</h1>
+            <div class="user-profile">
+                <div style="text-align: right;">
+                    <span id="currentDate" style="color: var(--text-muted); font-size: 0.8rem; display: block;"></span>
+                    <span style="font-size: 0.9rem; font-weight: 600;">Admin User</span>
+                </div>
+                <div class="user-avatar" id="userAvatar">A</div>
+            </div>
+        </header>
+
+        <div class="content-wrapper">
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div>
+                        <div class="stat-label">Total Revenue</div>
+                        <div class="stat-value" id="totalRevenue">...</div>
+                    </div>
+                    <div class="stat-icon">💰</div>
+                </div>
+
+                <div class="stat-card">
+                    <div>
+                        <div class="stat-label">Outstanding</div>
+                        <div class="stat-value text-warning" id="outstandingBalance">...</div>
+                    </div>
+                    <div class="stat-icon">⚠️</div>
+                </div>
+
+                <div class="stat-card">
+                    <div>
+                        <div class="stat-label">Customers</div>
+                        <div class="stat-value" id="totalCustomers">...</div>
+                    </div>
+                    <div class="stat-icon">👥</div>
+                </div>
+
+                <div class="stat-card">
+                    <div>
+                        <div class="stat-label">Total Invoices</div>
+                        <div class="stat-value" id="totalInvoices">...</div>
+                    </div>
+                    <div class="stat-icon">📄</div>
+                </div>
+            </div>
+
+            <!-- Recent Activity / Quick Actions -->
+            <div class="form-row">
+                <div class="col" style="flex: 2;">
+                    <div class="glass-card">
+                        <div class="card-header">
+                            Recent Transactions
+                            <a href="view_invoices.html" class="btn btn-secondary btn-sm">View All</a>
+                        </div>
+                        <div class="table-container" style="border: none; border-radius: 0 0 16px 16px;">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Customer</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th class="text-right">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentInvoicesBody">
+                                    <tr>
+                                        <td colspan="5" class="text-center" style="padding: 40px;">
+                                            <div style="color: var(--text-muted);">Loading data...</div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="glass-card">
+                        <div class="card-header">
+                            <span>Quick Actions</span>
+                            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">Common
+                                Tasks</span>
+                        </div>
+                        <div class="card-body" style="padding: 24px;">
+                            <a href="create_invoice.html" class="btn btn-primary"
+                                style="width: 100%; margin-bottom: 16px; height: 56px; display: flex; justify-content: space-between; padding: 0 24px; box-shadow: 0 4px 20px rgba(14, 165, 233, 0.2);">
+                                <span style="font-weight: 600; font-size: 1.05rem;">New Invoice</span>
+                                <span
+                                    style="background: rgba(255,255,255,0.2); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">+</span>
+                            </a>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <a href="view_customers.html" class="btn btn-secondary"
+                                    style="height: 100px; flex-direction: column; gap: 8px; border-radius: 12px; width: 100%;">
+                                    <span style="font-size: 1.8rem;">👥</span>
+                                    <span>Add Customer</span>
+                                </a>
+                                <button
+                                    onclick="api.request('/export/excel').then(() => window.location.href='/api/export/excel')"
+                                    class="btn btn-secondary"
+                                    style="height: 100px; flex-direction: column; gap: 8px; border-radius: 12px; width: 100%;">
+                                    <span style="font-size: 1.8rem;">📊</span>
+                                    <span>Report</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card"
+                        style="margin-top: 24px; background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(30, 41, 59, 0.1) 100%);">
+                        <div class="card-body">
+                            <div style="font-weight: 600; font-size: 1.1rem; margin-bottom: 8px;">System Status</div>
+                            <div
+                                style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--success-color);">
+                                <span
+                                    style="width: 8px; height: 8px; background: currentColor; border-radius: 50%; box-shadow: 0 0 8px currentColor;"></span>
+                                Online & Secure
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        // Check Auth
+        window.addEventListener('load', async () => {
+            try {
+                const user = await api.getCurrentUser();
+                if (!user.authenticated) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                document.getElementById('userAvatar').textContent = user.user.username.charAt(0).toUpperCase();
+            } catch (e) {
+                console.error("Auth check failed", e);
+                window.location.href = 'login.html';
+            }
+
+            // Set Date
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', dateOptions);
+
+            loadDashboardData();
+        });
+
+        async function loadDashboardData() {
+            try {
+                // Fetch data in parallel
+                const [customers, invoices] = await Promise.all([
+                    api.getCustomers(),
+                    api.getInvoices()
+                ]);
+
+                // Calculate Stats
+                document.getElementById('totalCustomers').textContent = customers.length;
+                document.getElementById('totalInvoices').textContent = invoices.length;
+
+                const revenue = invoices.reduce((sum, inv) => sum + (inv.total_amount - inv.remaining_balance), 0); // Realized revenue (paid amount)
+                const outstanding = invoices.reduce((sum, inv) => sum + inv.remaining_balance, 0);
+
+                const formatter = new Intl.NumberFormat('en-PK', { style: 'currency', currency: 'PKR', maximumFractionDigits: 0 });
+
+                document.getElementById('totalRevenue').textContent = formatter.format(revenue);
+                document.getElementById('outstandingBalance').textContent = formatter.format(outstanding);
+
+                // Render Recent Invoices (Last 5)
+                const recent = invoices.slice(-5).reverse();
+                const tbody = document.getElementById('recentInvoicesBody');
+
+                if (recent.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center" style="padding: 24px; color: var(--text-dim);">No transactions recorded</td></tr>';
+                } else {
+                    tbody.innerHTML = recent.map(inv => `
+                        <tr style="cursor: pointer;" onclick="window.location.href='view_invoices.html'">
+                            <td style="font-family: monospace; color: var(--primary-color);">${inv.invoice_number}</td>
+                            <td>${inv.customer_name}</td>
+                            <td style="color: var(--text-muted);">${new Date(inv.date).toLocaleDateString()}</td>
+                            <td><span class="badge badge-${inv.status.toLowerCase().replace(' ', '-')}">${inv.status}</span></td>
+                            <td class="text-right"><strong>${formatter.format(inv.total_amount)}</strong></td>
+                        </tr>
+                    `).join('');
+                }
+
+            } catch (error) {
+                console.error("Dashboard Load Error:", error);
+            }
+        }
+
+        async function handleLogout() {
+            await api.logout();
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+
+</html>

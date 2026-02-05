@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoices - Silver Trading System</title>
+    <link rel="stylesheet" href="css/theme.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-text">
+                <div class="logo-icon"></div>
+                <span>Silver Trading</span>
+            </div>
+        </div>
+
+        <ul class="nav-links">
+            <li class="nav-item">
+                <a href="index.html">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="create_invoice.html">
+                    <span class="nav-icon">➕</span>
+                    <span>Create Invoice</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="view_customers.html">
+                    <span class="nav-icon">👥</span>
+                    <span>Customers</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="view_invoices.html" class="active">
+                    <span class="nav-icon">📄</span>
+                    <span>Invoices</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <header class="top-header">
+            <h1 class="page-title">Transaction History</h1>
+            <div class="user-profile">
+                <span id="currentDate" style="color: var(--text-muted); font-size: 0.9rem;"></span>
+            </div>
+        </header>
+
+        <div class="content-wrapper">
+            <div class="glass-card">
+                <div class="card-header">
+                    <span>Transaction Log</span>
+                    <div style="display: flex; gap: 12px;">
+                        <input type="text" id="searchInput" placeholder="Search ID or Customer..." class="form-control"
+                            style="width: 300px; font-size: 0.9rem; padding: 8px 16px;" onkeyup="filterInvoices()">
+                        <select id="statusFilter" class="form-control" style="width: 160px;"
+                            onchange="filterInvoices()">
+                            <option value="">All Statuses</option>
+                            <option value="Paid">Paid</option>
+                            <option value="Unpaid">Unpaid</option>
+                            <option value="Partially Paid">Partially Paid</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-container" style="border: none;">
+                    <table class="table" id="invoicesTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Total</th>
+                                <th>Balance Due</th>
+                                <th>Status</th>
+                                <th class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoicesTableBody">
+                            <tr>
+                                <td colspan="7" class="text-center" style="padding: 40px; color: var(--text-muted);">
+                                    Loading ledger...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 style="font-size: 1.25rem; margin: 0; color: white;">Record Payment</h2>
+                <button onclick="closePaymentModal()"
+                    style="background:none; border:none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div
+                    style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--glass-border);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: var(--text-muted);">Total Invoice Value:</span>
+                        <strong id="payTotalAmount" style="color: white;"></strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted);">Balance Remaining:</span>
+                        <strong id="payRemainingBalance"
+                            style="color: var(--danger-color); font-size: 1.1rem;"></strong>
+                    </div>
+                </div>
+
+                <form id="paymentForm">
+                    <input type="hidden" id="payInvoiceId">
+                    <div class="form-group">
+                        <label class="form-label">Payment Amount</label>
+                        <input type="number" id="payAmount" class="form-control" required
+                            style="font-size: 1.1rem; font-weight: 600;">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Method</label>
+                        <select id="payMethod" class="form-control">
+                            <option value="Cash">Cash</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="Cheque">Cheque</option>
+                            <option value="Mobile Wallet">Mobile Wallet</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Notes</label>
+                        <input type="text" id="payNotes" class="form-control" placeholder="Transaction ID or notes">
+                    </div>
+                    <button type="submit" class="btn btn-success"
+                        style="width: 100%; padding: 14px; font-size: 1rem; font-weight: 600;">Process Payment</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoice Detail Modal (Basic) -->
+    <div id="invoiceModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 style="font-size: 1.25rem; margin: 0; color: white;">Invoice Details</h2>
+                <button onclick="document.getElementById('invoiceModal').style.display='none'"
+                    style="background:none; border:none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+            </div>
+            <div class="modal-body" id="invoiceDetail">
+                <!-- Content -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let allInvoices = [];
+        const formatCurrency = (val) => new Intl.NumberFormat('en-PK', { style: 'currency', currency: 'PKR', maximumFractionDigits: 0 }).format(val);
+
+        window.addEventListener('load', async () => {
+            await loadInvoices();
+        });
+
+        async function loadInvoices() {
+            try {
+                allInvoices = await api.getInvoices();
+                // Sort by date desc
+                allInvoices.sort((a, b) => new Date(b.date) - new Date(a.date));
+                renderInvoices(allInvoices);
+            } catch (e) {
+                console.error(e);
+                document.getElementById('invoicesTableBody').innerHTML = '<tr><td colspan="7" class="text-center text-danger">Network Error</td></tr>';
+            }
+        }
+
+        function renderInvoices(invoices) {
+            const tbody = document.getElementById('invoicesTableBody');
+            if (invoices.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="padding: 40px; color: var(--text-muted);">No records found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = invoices.map(inv => `
+                <tr class="invoice-row">
+                    <td style="font-family: monospace; font-weight: 500; color: var(--primary-color);">${inv.invoice_number}</td>
+                    <td style="color: var(--text-muted);">${new Date(inv.date).toLocaleDateString()}</td>
+                    <td style="font-weight: 500; color: white;">${inv.customer_name}</td>
+                    <td>${formatCurrency(inv.total_amount)}</td>
+                    <td style="color: ${inv.remaining_balance > 0 ? 'var(--danger-color)' : 'var(--success-color)'}; font-weight: 600;">
+                        ${formatCurrency(inv.remaining_balance)}
+                    </td>
+                    <td><span class="badge badge-${inv.status.toLowerCase().replace(' ', '-')}">${inv.status}</span></td>
+                    <td class="text-right">
+                        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                            <button class="btn btn-secondary btn-sm" onclick="viewInvoice(${inv.id})">Details</button>
+                            ${inv.remaining_balance > 0 ? `<button class="btn btn-success btn-sm" onclick="openPaymentModal(${inv.id}, ${inv.total_amount}, ${inv.remaining_balance})">Pay</button>` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filterInvoices() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+
+            const filtered = allInvoices.filter(inv => {
+                const matchesTerm = inv.invoice_number.toLowerCase().includes(term) || inv.customer_name.toLowerCase().includes(term);
+                const matchesStatus = status ? inv.status === status : true;
+                return matchesTerm && matchesStatus;
+            });
+            renderInvoices(filtered);
+        }
+
+        // --- Payment Modal Logic ---
+        function openPaymentModal(id, total, balance) {
+            document.getElementById('payInvoiceId').value = id;
+            document.getElementById('payTotalAmount').textContent = formatCurrency(total);
+            document.getElementById('payRemainingBalance').textContent = formatCurrency(balance);
+            document.getElementById('payAmount').value = balance; // Default to full balance
+            document.getElementById('paymentModal').style.display = 'block';
+        }
+
+        function closePaymentModal() {
+            document.getElementById('paymentModal').style.display = 'none';
+        }
+
+        document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('payInvoiceId').value;
+            const amount = parseFloat(document.getElementById('payAmount').value);
+            const method = document.getElementById('payMethod').value;
+            const notes = document.getElementById('payNotes').value;
+
+            try {
+                await api.addPayment(id, {
+                    amount: amount,
+                    payment_method: method,
+                    notes: notes
+                });
+                closePaymentModal();
+                alert('Payment Processed Successfully');
+                loadInvoices(); // Refresh
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        });
+
+        // --- View Invoice Details ---
+        function viewInvoice(id) {
+            const inv = allInvoices.find(i => i.id === id);
+            if (!inv) return;
+
+            document.getElementById('invoiceDetail').innerHTML = `
+                 <div class="form-row">
+                     <div class="col">
+                         <h3 style="margin: 0; color: white;">#${inv.invoice_number}</h3>
+                         <p style="color: var(--text-muted); margin-top: 4px;">${new Date(inv.date).toLocaleDateString()}</p>
+                         <p style="margin-top: 16px;">Customer: <strong style="color: white;">${inv.customer_name}</strong></p>
+                     </div>
+                     <div class="col text-right">
+                         <div style="font-size: 2rem; color: var(--primary-color); font-weight: 700;">${formatCurrency(inv.total_amount)}</div>
+                         <div class="badge badge-${inv.status.toLowerCase().replace(' ', '-')}">${inv.status}</div>
+                     </div>
+                 </div>
+                 
+                 <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--glass-border);">
+                     <button class="btn btn-primary" onclick="window.location.href='/api/invoices/${inv.id}/pdf'" style="width: 100%; justify-content: center;">
+                        Download Official Invoice (PDF)
+                     </button>
+                 </div>
+             `;
+            document.getElementById('invoiceModal').style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>

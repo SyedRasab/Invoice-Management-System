@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customers - Silver Trading System</title>
+    <link rel="stylesheet" href="css/theme.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-text">
+                <div class="logo-icon"></div>
+                <span>Silver Trading</span>
+            </div>
+        </div>
+
+        <ul class="nav-links">
+            <li class="nav-item">
+                <a href="index.html">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="create_invoice.html">
+                    <span class="nav-icon">➕</span>
+                    <span>Create Invoice</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="view_customers.html" class="active">
+                    <span class="nav-icon">👥</span>
+                    <span>Customers</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="view_invoices.html">
+                    <span class="nav-icon">📄</span>
+                    <span>Invoices</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <header class="top-header">
+            <h1 class="page-title">Client Database</h1>
+            <div class="user-profile">
+                <span id="currentDate" style="color: var(--text-muted); font-size: 0.9rem;"></span>
+            </div>
+        </header>
+
+        <div class="content-wrapper">
+            <div class="glass-card">
+                <div class="card-header">
+                    <span>Registered Entities</span>
+                    <div style="display: flex; gap: 12px;">
+                        <input type="text" id="searchInput" placeholder="Search database..." class="form-control"
+                            style="width: 250px; font-size: 0.9rem; padding: 8px 16px;" onkeyup="filterCustomers()">
+                        <button class="btn btn-primary btn-sm" onclick="showAddCustomerModal()">+ Register New</button>
+                    </div>
+                </div>
+
+                <div class="table-container" style="border: none;">
+                    <table class="table" id="customersTable">
+                        <thead>
+                            <tr>
+                                <th>Entity Name</th>
+                                <th>Contact</th>
+                                <th>Outstanding Balance</th>
+                                <th>Invoices</th>
+                                <th>Last Activity</th>
+                                <th class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customersTableBody">
+                            <tr>
+                                <td colspan="6" class="text-center" style="padding: 40px; color: var(--text-muted);">
+                                    Retrieving records...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Detail Modal -->
+    <div id="customerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 style="font-size: 1.25rem; margin: 0; color: white;">Client Profile</h2>
+                <button onclick="document.getElementById('customerModal').style.display='none'"
+                    style="background:none; border:none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+            </div>
+            <div class="modal-body" id="customerDetail">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let allCustomers = [];
+        const formatCurrency = (val) => new Intl.NumberFormat('en-PK', { style: 'currency', currency: 'PKR', maximumFractionDigits: 0 }).format(val);
+
+        window.addEventListener('load', async () => {
+            await loadCustomers();
+        });
+
+        async function loadCustomers() {
+            try {
+                allCustomers = await api.getCustomers();
+                renderCustomers(allCustomers);
+            } catch (e) {
+                console.error(e);
+                document.getElementById('customersTableBody').innerHTML = '<tr><td colspan="6" class="text-center text-danger">Network Error</td></tr>';
+            }
+        }
+
+        function renderCustomers(customers) {
+            const tbody = document.getElementById('customersTableBody');
+            if (customers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="padding: 40px; color: var(--text-muted);">No records found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = customers.map(c => `
+                <tr>
+                    <td style="font-weight: 600; color: white;">${c.name}</td>
+                    <td style="color: var(--text-muted);">${c.contact}</td>
+                    <td style="font-weight: 600; color: ${c.total_outstanding > 0 ? 'var(--danger-color)' : 'var(--success-color)'}">
+                        ${formatCurrency(c.total_outstanding)}
+                    </td>
+                    <td><span style="background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 10px; font-size: 0.8rem;">${c.total_invoices}</span></td>
+                    <td style="color: var(--text-dim); font-size: 0.85rem;">${c.created_date ? new Date(c.created_date).toLocaleDateString() : '-'}</td>
+                    <td class="text-right">
+                        <button class="btn btn-secondary btn-sm" onclick="viewCustomer(${c.id})">Profile</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filterCustomers() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allCustomers.filter(c =>
+                c.name.toLowerCase().includes(term) ||
+                c.contact.toLowerCase().includes(term)
+            );
+            renderCustomers(filtered);
+        }
+
+        async function viewCustomer(id) {
+            try {
+                const customer = await api.getCustomer(id);
+                const detailDiv = document.getElementById('customerDetail');
+
+                let invoicesHtml = '';
+                if (customer.invoices && customer.invoices.length > 0) {
+                    invoicesHtml = `
+                        <h3 style="font-size: 1rem; margin: 32px 0 16px 0; color: var(--secondary-color); text-transform: uppercase; letter-spacing: 1px;">Recent Transaction History</h3>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead><tr><th>Invoice</th><th>Date</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+                                <tbody>
+                                    ${customer.invoices.map(inv => `
+                                        <tr>
+                                            <td style="font-family: monospace;">${inv.invoice_number}</td>
+                                            <td>${new Date(inv.date).toLocaleDateString()}</td>
+                                            <td>${formatCurrency(inv.total_amount)}</td>
+                                            <td><span class="badge badge-${inv.status.toLowerCase().replace(' ', '-')}">${inv.status}</span></td>
+                                            <td><button class="btn btn-secondary btn-sm" onclick="window.location.href='/api/invoices/${inv.id}/pdf'">PDF</button></td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                     `;
+                } else {
+                    invoicesHtml = '<p style="margin-top: 24px; color: var(--text-muted); text-align: center; font-style: italic;">No invoice history associated with this account.</p>';
+                }
+
+                detailDiv.innerHTML = `
+                    <div style="background: rgba(255,255,255,0.03); padding: 24px; border-radius: 16px; border: 1px solid var(--glass-border);">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <h3 style="margin: 0; font-size: 1.5rem; color: white;">${customer.name}</h3>
+                                <p style="color: var(--text-muted); margin: 4px 0 0 0;">${customer.contact}</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Outstanding Balance</div>
+                                <div style="font-size: 1.25rem; font-weight: 700; color: ${customer.total_outstanding > 0 ? 'var(--danger-color)' : 'var(--success-color)'};">${formatCurrency(customer.total_outstanding)}</div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 24px;">
+                            <span style="color: var(--text-dim); font-size: 0.9rem;">Internal Notes:</span>
+                            <div style="margin-top: 8px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 8px; color: var(--text-main); font-style: italic;">
+                                ${customer.notes || 'No internal notes available.'}
+                            </div>
+                        </div>
+                    </div>
+                    ${invoicesHtml}
+                `;
+
+                document.getElementById('customerModal').style.display = 'block';
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function showAddCustomerModal() {
+            alert("Please use the Create Invoice page to register new entities in this version.");
+        }
+    </script>
+</body>
+
+</html>

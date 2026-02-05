@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Invoice - Silver Trading System</title>
+    <link rel="stylesheet" href="css/theme.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-text">
+                <div class="logo-icon"></div>
+                <span>Silver Trading</span>
+            </div>
+        </div>
+
+        <ul class="nav-links">
+            <li class="nav-item">
+                <a href="index.html">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="create_invoice.html" class="active">
+                    <span class="nav-icon">➕</span>
+                    <span>Create Invoice</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="view_customers.html">
+                    <span class="nav-icon">👥</span>
+                    <span>Customers</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="view_invoices.html">
+                    <span class="nav-icon">📄</span>
+                    <span>Invoices</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <header class="top-header">
+            <h1 class="page-title">Create Transaction</h1>
+            <div class="user-profile">
+                <span id="currentDate" style="color: var(--text-muted); font-size: 0.9rem;"></span>
+            </div>
+        </header>
+
+        <div class="content-wrapper">
+            <form id="invoiceForm">
+                <div class="form-row">
+                    <!-- Left Column -->
+                    <div class="col" style="flex: 2;">
+
+                        <!-- Customer Card -->
+                        <div class="glass-card" style="margin-bottom: 24px;">
+                            <div class="card-header">
+                                <span style="display: flex; align-items: center; gap: 10px;">
+                                    <span
+                                        style="background: rgba(56, 189, 248, 0.1); color: var(--primary-color); padding: 6px; border-radius: 6px;">👥</span>
+                                    Customer Identity
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label class="form-label">Select Client</label>
+                                    <select id="customerSelect" class="form-control" onchange="handleCustomerSelect()">
+                                        <option value="">-- Search Database --</option>
+                                        <option value="new">+ Register New Entity</option>
+                                    </select>
+                                </div>
+
+                                <div id="newCustomerFields"
+                                    style="display: none; background: rgba(56, 189, 248, 0.05); padding: 20px; border-radius: 12px; margin-top: 16px; border: 1px solid rgba(56, 189, 248, 0.1);">
+                                    <h4 style="margin: 0 0 16px 0; font-size: 0.95rem; color: var(--primary-color);">New
+                                        Entity Registration</h4>
+                                    <div class="form-row">
+                                        <div class="col">
+                                            <div class="form-group" style="margin-bottom: 0;">
+                                                <label class="form-label">Full Name</label>
+                                                <input type="text" id="newCustomerName" class="form-control"
+                                                    placeholder="Legal Name">
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="form-group" style="margin-bottom: 0;">
+                                                <label class="form-label">Contact</label>
+                                                <input type="text" id="newCustomerContact" class="form-control"
+                                                    placeholder="Primary Contact">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="existingCustomerDetails"
+                                    style="display: none; margin-top: 16px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                                    <div style="display: flex; gap: 24px; color: var(--text-muted); font-size: 0.9rem;">
+                                        <span>Status: <strong class="text-success">Verified</strong></span>
+                                        <span>Contact: <strong style="color: #fff;" id="displayContact"></strong></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Silver Details Card -->
+                        <div class="glass-card">
+                            <div class="card-header">
+                                <span style="display: flex; align-items: center; gap: 10px;">
+                                    <span
+                                        style="background: rgba(148, 163, 184, 0.1); color: var(--secondary-color); padding: 6px; border-radius: 6px;">⚖️</span>
+                                    Silver Specifications
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-row">
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <label class="form-label">Weight Input (kg)</label>
+                                            <input type="number" id="silverWeight" class="form-control" step="0.001"
+                                                placeholder="0.000" oninput="calculate()"
+                                                style="font-family: monospace; font-size: 1.1rem;">
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <label class="form-label">Standard Unit</label>
+                                            <select id="pieceSize" class="form-control" onchange="calculate()">
+                                                <option value="10 Tola">10 Tola (116.5g)</option>
+                                                <option value="500 g">500 g Bar</option>
+                                                <option value="1 kg">1 kg Bar</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <label class="form-label">Calculated Units</label>
+                                            <input type="text" id="numPieces" class="form-control" readonly
+                                                style="background: rgba(0,0,0,0.3); color: var(--text-muted);">
+                                        </div>
+                                    </div>
+                                    <div class="col"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="col" style="flex: 1;">
+
+                        <!-- Billing Card -->
+                        <div class="glass-card" style="margin-bottom: 24px;">
+                            <div class="card-header">Financials</div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label class="form-label">Billing Mode</label>
+                                    <div
+                                        style="display: flex; gap: 4px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 8px;">
+                                        <label
+                                            style="flex: 1; text-align: center; padding: 8px; cursor: pointer; border-radius: 6px; transition: all 0.2s;"
+                                            id="labelReady">
+                                            <input type="radio" name="billingMode" value="Ready" checked
+                                                onchange="updateModeUI(); calculate();" style="display: none;">
+                                            Ready
+                                        </label>
+                                        <label
+                                            style="flex: 1; text-align: center; padding: 8px; cursor: pointer; border-radius: 6px; transition: all 0.2s;"
+                                            id="labelMazduri">
+                                            <input type="radio" name="billingMode" value="Mazduri"
+                                                onchange="updateModeUI(); calculate();" style="display: none;">
+                                            Mazduri
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <script>
+                                    function updateModeUI() {
+                                        const mode = document.querySelector('input[name="billingMode"]:checked').value;
+                                        const r = document.getElementById('labelReady');
+                                        const m = document.getElementById('labelMazduri');
+
+                                        if (mode === 'Ready') {
+                                            r.style.background = 'var(--primary-color)';
+                                            r.style.color = 'white';
+                                            r.style.fontWeight = '600';
+                                            m.style.background = 'transparent';
+                                            m.style.color = 'var(--text-muted)';
+                                            m.style.fontWeight = 'normal';
+                                            document.getElementById('rateLabel').textContent = 'Rate per kg';
+                                        } else {
+                                            m.style.background = 'var(--primary-color)';
+                                            m.style.color = 'white';
+                                            m.style.fontWeight = '600';
+                                            r.style.background = 'transparent';
+                                            r.style.color = 'var(--text-muted)';
+                                            r.style.fontWeight = 'normal';
+                                            document.getElementById('rateLabel').textContent = 'Rate per Piece';
+                                        }
+                                    }
+                                    // Init
+                                    window.addEventListener('load', updateModeUI);
+                                </script>
+
+                                <div class="form-group">
+                                    <label class="form-label" id="rateLabel">Rate per kg</label>
+                                    <input type="number" id="rate" class="form-control" placeholder="0.00"
+                                        oninput="calculate()">
+                                </div>
+
+                                <div class="form-group"
+                                    style="background: rgba(56, 189, 248, 0.05); padding: 16px; border-radius: 12px; border: 1px solid rgba(56, 189, 248, 0.1);">
+                                    <div
+                                        style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+                                        <label class="form-label" style="margin: 0; color: var(--primary-color);">Total
+                                            Amount</label>
+                                        <span class="badge badge-paid" style="font-size: 0.7rem;">PKR</span>
+                                    </div>
+                                    <input type="text" id="totalAmount" class="form-control" readonly
+                                        style="background: transparent; border: none; font-size: 1.5rem; font-weight: 700; color: #fff; text-align: right; padding: 0; box-shadow: none;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Card -->
+                        <div class="glass-card">
+                            <div class="card-header">Payment</div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label class="form-label">Advance Deposit</label>
+                                    <input type="number" id="advancePayment" class="form-control" placeholder="0.00"
+                                        oninput="calculate()">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Method</label>
+                                    <select id="paymentMethod" class="form-control">
+                                        <option value="Cash">Cash</option>
+                                        <option value="Bank Transfer">Bank Transfer</option>
+                                        <option value="Cheque">Cheque</option>
+                                        <option value="Mobile Wallet">Mobile Wallet</option>
+                                    </select>
+                                </div>
+
+                                <div
+                                    style="border-top: 1px solid var(--glass-border); margin-top: 20px; padding-top: 20px;">
+                                    <div
+                                        style="display: flex; justify-content: space-between; font-weight: 600; font-size: 1.1rem;">
+                                        <span style="color: var(--text-muted);">Balance Due:</span>
+                                        <span id="remainingBalance" style="color: var(--danger-color);">0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary"
+                            style="width: 100%; padding: 16px; font-size: 1.1rem; margin-top: 24px; box-shadow: 0 4px 20px rgba(56, 189, 248, 0.4);">
+                            Finalize Invoice
+                        </button>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast"
+        style="position: fixed; bottom: 32px; right: 32px; background: rgba(30, 41, 59, 0.9); backdrop-filter: blur(12px); color: white; padding: 16px 24px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: none; z-index: 3000; border: 1px solid var(--glass-border);">
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let customersList = [];
+
+        // formatter
+        const formatCurrency = (val) => new Intl.NumberFormat('en-PK', { style: 'currency', currency: 'PKR', maximumFractionDigits: 0 }).format(val);
+
+        window.addEventListener('load', async () => {
+            // Load Customers
+            try {
+                customersList = await api.getCustomers();
+                const select = document.getElementById('customerSelect');
+                customersList.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.textContent = c.name;
+                    select.appendChild(opt);
+                });
+            } catch (e) { console.error(e); }
+        });
+
+        function handleCustomerSelect() {
+            const val = document.getElementById('customerSelect').value;
+            const newFields = document.getElementById('newCustomerFields');
+            const existingDetails = document.getElementById('existingCustomerDetails');
+
+            if (val === 'new') {
+                newFields.style.display = 'block';
+                existingDetails.style.display = 'none';
+            } else if (val) {
+                newFields.style.display = 'none';
+                existingDetails.style.display = 'block';
+                const cust = customersList.find(c => c.id == val);
+                if (cust) {
+                    document.getElementById('displayContact').textContent = cust.contact;
+                }
+            } else {
+                newFields.style.display = 'none';
+                existingDetails.style.display = 'none';
+            }
+        }
+
+        async function calculate() {
+            const weight = parseFloat(document.getElementById('silverWeight').value) || 0;
+            const size = document.getElementById('pieceSize').value;
+            const rate = parseFloat(document.getElementById('rate').value) || 0;
+            const advance = parseFloat(document.getElementById('advancePayment').value) || 0;
+            const mode = document.querySelector('input[name="billingMode"]:checked').value;
+
+            // Calc pieces
+            try {
+                const piecesRes = await api.calculatePieces(weight, size);
+                document.getElementById('numPieces').value = piecesRes.num_pieces.toFixed(2);
+
+                // Calc Total
+                const totalRes = await api.calculateTotal({
+                    billing_mode: mode,
+                    silver_weight: weight,
+                    num_pieces: piecesRes.num_pieces,
+                    rate: rate,
+                    advance_payment: advance
+                });
+
+                document.getElementById('totalAmount').value = formatCurrency(totalRes.total_amount);
+                const bal = document.getElementById('remainingBalance');
+                bal.textContent = formatCurrency(totalRes.remaining_balance);
+
+                if (totalRes.remaining_balance <= 0) {
+                    bal.style.color = 'var(--success-color)';
+                } else {
+                    bal.style.color = 'var(--danger-color)';
+                }
+
+            } catch (e) {
+                console.error("Calculation error", e);
+            }
+        }
+
+        document.getElementById('invoiceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.textContent = 'Processing Transaction...';
+
+            const formData = {
+                silver_weight: parseFloat(document.getElementById('silverWeight').value),
+                piece_size: document.getElementById('pieceSize').value,
+                billing_mode: document.querySelector('input[name="billingMode"]:checked').value,
+                rate: parseFloat(document.getElementById('rate').value),
+                advance_payment: parseFloat(document.getElementById('advancePayment').value) || 0,
+                payment_method: document.getElementById('paymentMethod').value
+            };
+
+            const custVal = document.getElementById('customerSelect').value;
+            if (custVal === 'new') {
+                formData.customer_name = document.getElementById('newCustomerName').value;
+                formData.contact = document.getElementById('newCustomerContact').value;
+            } else {
+                formData.customer_id = custVal;
+            }
+
+            try {
+                const res = await api.createInvoice(formData);
+                showToast(`SUCCESS: Invoice ${res.invoice_number} Generated`, 'success');
+                setTimeout(() => window.location.href = 'view_invoices.html', 1500);
+            } catch (error) {
+                showToast(error.message, 'error');
+                btn.disabled = false;
+                btn.textContent = 'Finalize Invoice';
+            }
+        });
+
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.style.borderLeft = type === 'error' ? '4px solid var(--danger-color)' : '4px solid var(--success-color)';
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
+        }
+    </script>
+</body>
+
+</html>
