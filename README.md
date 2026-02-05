@@ -164,7 +164,7 @@ This project is licensed under the **MIT License**. You are free to use, modify,
 
 **Developed by Syed Rasab Ul Haque**
 
-*   📧 **Email**: contact@yourdomain.com
+*   📧 **Email**: rasab1781@gmail.com
 *   💼 **LinkedIn**: [www.linkedin.com/in/rasab3922](https://www.linkedin.com/in/rasab3922)
 
 ---
